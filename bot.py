@@ -27,7 +27,12 @@ async def roll(ctx, num=6, freq=1):
 @bot.command(name="odds", help="Odds on")
 async def odds(ctx, name, *args):
     print (name)
-    members = [[member.name.lower(), member.id] for member in ctx.guild.members]
+    for member in ctx.guild.members:
+        members = member.name.lower()
+        id = member.id
+        if (members == name.lower()) or (name[3:-1]==member.id):
+            print("test")
+
 
     #first arg = person, 2nd onwards = string
 
@@ -37,4 +42,13 @@ async def user(ctx, name):
     guild = discord.utils.get(bot.guilds, name=GUILD)
     members = [member.name.lower() for member in guild.members]
     print(members)
+
+
+@bot.command(name="shutdown", help="Off switch")
+async def shutdown(ctx):
+    if ctx.message.author.server_permissions.administrator:
+        await ctx.bot.logout()
+    else:
+        await ctx.send("User does not have permission")
+
 bot.run(TOKEN)
