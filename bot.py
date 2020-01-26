@@ -26,15 +26,37 @@ async def roll(ctx, num=6, freq=1):
 
 @bot.command(name="odds", help="Odds on")
 async def odds(ctx, name, *args):
-    print (name)
+    print(name)
+    if (ctx.author.name.lower() == name.lower()) or (name[3:-1] == str(ctx.author.id)):
+        await ctx.send("You can't odds on yourself")
+        return
     for member in ctx.guild.members:
         members = member.name.lower()
-        id = member.id
-        if (members == name.lower()) or (name[3:-1]==member.id):
-            print("test")
-
-
+        id = str(member.id)
+        #print(str(name[3:-1])==str(id))
+        if (members == name.lower()) or (name[3:-1] == id):
+            await ctx.send(str(ctx.author.name) + " odds on'd " + members + " " + ' '.join(args))
+            await ctx.send(members + " reply with your odds (1-20), decline otherwise")
+            msg = await bot.wait_for("message", check=check(member), timeout=300)
+            odds = int(msg.content)
+            if int(odds < 0) or (odds > 20):
+                await ctx.send("those are not valid odds")
+                return
     #first arg = person, 2nd onwards = string
+
+
+def check(author):
+    print ("asdasdasd"+ str(author)+ "asdfasdasd")
+    def inner_check(message):
+        print(str(message.author)+"tqasdhiu")
+        if message.author != author:
+            return False
+        try:
+            int(message.content)
+            return True
+        except ValueError:
+            return False
+    return inner_check
 
 
 @bot.command(name="user", help="Check if a user is present")
@@ -45,10 +67,9 @@ async def user(ctx, name):
 
 
 @bot.command(name="shutdown", help="Off switch")
+@commands.has_permissions(administrator=True)
 async def shutdown(ctx):
-    if ctx.message.author.server_permissions.administrator:
-        await ctx.bot.logout()
-    else:
-        await ctx.send("User does not have permission")
-
+    await ctx.send("Logging out")
+    print(ctx.author)
+    await ctx.bot.logout()
 bot.run(TOKEN)
