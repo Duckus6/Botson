@@ -2,6 +2,7 @@
 import os
 import random as rand
 import discord
+import sys
 from dotenv import load_dotenv
 from discord.ext import commands
 
