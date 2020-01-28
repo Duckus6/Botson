@@ -11,6 +11,15 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv("DISCORD_GUILD")
 bot = commands.Bot(command_prefix='!')
 
+odds = None
+users_odds = None
+
+
+def cleanup():
+    odds = None
+    users_odds = None
+
+
 @bot.event
 async def on_ready():
     print(f'{bot.user.name} has connected to Discord!')
@@ -27,6 +36,7 @@ async def roll(ctx, num=6, freq=1):
 
 @bot.command(name="odds", help="Odds on")
 async def odds(ctx, name, *args):
+    cleanup()
     print(name)
     if (ctx.author.name.lower() == name.lower()) or (name[3:-1] == str(ctx.author.id)):
         await ctx.send("You can't odds on yourself")
@@ -39,12 +49,32 @@ async def odds(ctx, name, *args):
             await ctx.send(str(ctx.author.name) + " odds on'd " + members + " " + ' '.join(args))
             await ctx.send(members + " reply with your odds (1-20), decline otherwise")
             msg = await bot.wait_for("message", check=check(member), timeout=300)
-            odds = int(msg.content)
+            odd = int(msg.content)
             if int(odds < 0) or (odds > 20):
                 await ctx.send("those are not valid odds")
                 return
+            odds = odd
+            users_odds = [member,ctx.author.name]
+            await ctx.send(member, "Enter your odds between 1 and {}".format(odds))
+            await ctx.send(ctx.author.name, "Enter your odds between 1 and {}".format(odds))
     #first arg = person, 2nd onwards = string
 
+
+@bot.event
+async def on_message(message):
+    if not(message.channel == discord.DMChannel):
+        if odds and (message.author in users_odds):
+            try:
+                num = int(message.content)
+                if (num < 0) or (num > odds):
+                    return
+            except TypeError:
+                return
+            if message.author == users_odds[0]:
+
+                print ("yay")
+            elif message.author == users_odds[1]:
+                print("yay2")
 
 def check(author):
     print ("asdasdasd"+ str(author)+ "asdfasdasd")
